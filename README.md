@@ -3,9 +3,9 @@ The Asynchronous Temporal Queue (ATQ) is a data structure designed to handle asy
 
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/murInJ/Asynchronous-Temporal-Queue.svg)](https://github.com/murInJ/Asynchronous-Temporal-Queue
 )
-![GitHub Release](https://img.shields.io/github/v/release/murInJAsynchronous-Temporal-Queue
+![GitHub Release](https://img.shields.io/github/v/release/murInJ/Asynchronous-Temporal-Queue
 )
-[![GitHub contributors](https://img.shields.io/github/contributors/MurInJAsynchronous-Temporal-Queue.svg)](https://GitHub.com/MurInJ/Asynchronous-Temporal-Queue/graphs/contributors/)
+[![GitHub contributors](https://img.shields.io/github/contributors/MurInJ/Asynchronous-Temporal-Queue.svg)](https://GitHub.com/MurInJ/Asynchronous-Temporal-Queue/graphs/contributors/)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/murInJ/Asynchronous-Temporal-Queue/go.yml)
 
 Key Features:
