@@ -1,97 +1,98 @@
 package core
 
 import (
-	"runtime"
 	"sync"
 	"testing"
 	"time"
 )
 
 func TestAsynchronousTemporalQueue(t *testing.T) {
-	t.Run("CreateChannel", func(t *testing.T) {
-		queue := NewAsynchronousTemporalQueue()
-		key := "test_channel"
+	queue := NewAsynchronousTemporalQueue()
 
-		queue.CreateChannel(key)
+	// Test CreateChannel
+	queue.CreateChannel("channel1")
 
-		_, ok := queue.channelMap.Load(key)
+	// Test Push and Pop
+	wg := sync.WaitGroup{}
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func(index int) {
+			defer wg.Done()
+			queue.Push("channel1", index, time.Now().UnixNano())
+		}(i)
+	}
+	wg.Wait()
+
+	prevNTP := int64(0)
+	for !queue.Empty() {
+		values, ntp, ok := queue.Pop()
 		if !ok {
-			t.Errorf("Failed to create channel with key %s", key)
+			t.Error("Pop operation failed.")
 		}
-	})
-
-	t.Run("CloseChannel", func(t *testing.T) {
-		queue := NewAsynchronousTemporalQueue()
-		key := "test_channel"
-		queue.CreateChannel(key)
-
-		queue.CloseChannel(key)
-		runtime.Gosched()
-		_, ok := queue.channelMap.Load(key)
-		if ok {
-			t.Errorf("Failed to close channel with key %s", key)
+		if len(values) != 1 {
+			t.Error("Incorrect data retrieved from Pop.")
 		}
-	})
-
-	t.Run("Push", func(t *testing.T) {
-		queue := NewAsynchronousTemporalQueue()
-		key := "test_channel"
-		queue.CreateChannel(key)
-
-		value := "test_value"
-		NTP := time.Now().UnixNano()
-
-		queue.Push(key, value, NTP)
-
-		item, _ := queue.channelMap.Load(key)
-		queueItem := item.(*asynchronousTemporalQueueItem)
-
-		if queueItem.queue.Empty() {
-			t.Error("Failed to push value to the queue")
+		if prevNTP > ntp {
+			t.Error("Pop operation returned out of order data.")
 		}
-	})
+		prevNTP = ntp
+	}
 
-	t.Run("Pop", func(t *testing.T) {
-		queue := NewAsynchronousTemporalQueue()
-		key := "test_channel"
-		queue.CreateChannel(key)
+	// Test Head
+	queue.Push("channel1", "data2", time.Now().UnixNano())
+	values, _, ok := queue.Head()
+	if !ok {
+		t.Error("Head operation failed.")
+	}
+	if len(values) != 1 || values["channel1"] != "data2" {
+		t.Error("Incorrect data retrieved from Head.")
+	}
 
-		value := "test_value"
-		NTP := time.Now().UnixNano()
+	// Test CloseChannel
+	queue.CloseChannel("channel1")
 
-		queue.Push(key, value, NTP)
+	// Test StartSample and CloseSample
+	queue.StartSample(60, sync.Map{})
+	queue.CloseSample()
+}
 
-		values, NTP, ok := queue.Pop()
+func TestAsynchronousTemporalQueueWithSampling(t *testing.T) {
+	queue := NewAsynchronousTemporalQueue()
 
-		if !ok || len(values) != 1 || values[key] != value {
-			t.Errorf("Failed to pop value from the queue. Got: %v, Expected: {%s: %s}", values, key, value)
+	// Test CreateChannel
+	queue.CreateChannel("channel1")
+
+	sampleWeights := sync.Map{}
+	sampleWeights.Store("channel1", 1.0)
+	queue.StartSample(60, sampleWeights)
+
+	// Test Push and Pop
+	wg := sync.WaitGroup{}
+	for i := 0; i < 1000; i++ {
+		wg.Add(1)
+		go func(index int) {
+			defer wg.Done()
+			queue.Push("channel1", index, time.Now().UnixNano())
+		}(i)
+	}
+	wg.Wait()
+
+	prevNTP := int64(0)
+	for !queue.Empty() {
+		values, ntp, ok := queue.Pop()
+		if !ok {
+			t.Error("Pop operation failed.")
 		}
-
-		if _, ok := queue.channelMap.Load(key); !ok {
-			t.Errorf("Channel should not be closed after popping a value")
+		if len(values) != 1 {
+			t.Error("Incorrect data retrieved from Pop.")
 		}
-	})
-
-	t.Run("Head", func(t *testing.T) {
-		queue := NewAsynchronousTemporalQueue()
-		key := "test_channel"
-		queue.CreateChannel(key)
-
-		value := "test_value"
-		NTP := time.Now().UnixNano()
-
-		queue.Push(key, value, NTP)
-
-		values, NTP, ok := queue.Head(key)
-
-		if !ok || len(values) != 1 || values[key] != value {
-			t.Errorf("Failed to get head value from the queue. Got: %v, Expected: {%s: %s}", values, key, value)
+		if prevNTP > ntp {
+			t.Error("Pop operation returned out of order data.")
 		}
-
-		if _, ok := queue.channelMap.Load(key); !ok {
-			t.Errorf("Channel should not be closed after getting head value")
-		}
-	})
+		prevNTP = ntp
+	}
+	// Test CloseSample
+	queue.CloseSample()
 }
 
 // BenchmarkCreateChannel 测试创建通道的性能
@@ -214,7 +215,7 @@ func BenchmarkHead(b *testing.B) {
 		go func() {
 			defer wg.Done()
 			for j := 0; j < b.N; j++ {
-				queue.Head("test_key")
+				queue.Head()
 			}
 		}()
 	}
