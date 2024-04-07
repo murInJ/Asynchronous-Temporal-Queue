@@ -1,16 +1,12 @@
 # Asynchronous-Temporal-Queue
 The Asynchronous Temporal Queue (ATQ) is a data structure designed to handle asynchronous data arrival while preserving temporal order. It is particularly useful in scenarios where data from multiple sources arrives at irregular intervals and needs to be processed in the order of their timestamps.
 
-[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/murInJ/Asynchronous-Temporal-Queue
-.svg)](https://github.com/murInJ/Asynchronous-Temporal-Queue
+[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/murInJ/Asynchronous-Temporal-Queue.svg)](https://github.com/murInJ/Asynchronous-Temporal-Queue
 )
-![GitHub Release](https://img.shields.io/github/v/release/murInJ/Asynchronous-Temporal-Queue
+![GitHub Release](https://img.shields.io/github/v/release/murInJAsynchronous-Temporal-Queue
 )
-[![GitHub contributors](https://img.shields.io/github/contributors/MurInJ/Asynchronous-Temporal-Queue
-.svg)](https://GitHub.com/MurInJ/Asynchronous-Temporal-Queue
-/graphs/contributors/)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/murInJ/Asynchronous-Temporal-Queue
-/go.yml)
+[![GitHub contributors](https://img.shields.io/github/contributors/MurInJAsynchronous-Temporal-Queue.svg)](https://GitHub.com/MurInJ/Asynchronous-Temporal-Queue/graphs/contributors/)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/murInJ/Asynchronous-Temporal-Queue/go.yml)
 
 Key Features:
 
