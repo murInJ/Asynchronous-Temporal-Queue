@@ -1,7 +1,7 @@
 package main
 
-import "github.com/murInJ/Asynchronous-Temporal-Queue/test"
+import "github.com/murInJ/Asynchronous-Temporal-Queue/simu"
 
 func main() {
-	test.Test_rtsp()
+	simu.Test_rtsp()
 }

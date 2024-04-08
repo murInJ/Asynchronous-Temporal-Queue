@@ -24,8 +24,8 @@ jobs:
     - name: Build_core
       run: go build -v ./core/...
 
-    - name: Build_test
-      run: go build -v ./test/ATQ_test.go
+    # - name: Build_test
+    #   run: go build -v ./test/ATQ_test.go
 
     - name: Test
-      run: go test -v ./test/ATQ_test.go
+      run: go test -v ./test/...
