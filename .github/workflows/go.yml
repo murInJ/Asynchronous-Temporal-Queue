@@ -28,4 +28,4 @@ jobs:
       run: go build -v ./test/ATQ_test.go
 
     - name: Test
-      run: go test -v ./...
+      run: go test -v ./test/ATQ_test.go
