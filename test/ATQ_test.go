@@ -1,13 +1,15 @@
-package core
+package test
 
 import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/murInJ/Asynchronous-Temporal-Queue/core"
 )
 
 func TestAsynchronousTemporalQueue(t *testing.T) {
-	queue := NewAsynchronousTemporalQueue()
+	queue := core.NewAsynchronousTemporalQueue()
 
 	// Test CreateChannel
 	queue.CreateChannel("channel1")
@@ -57,7 +59,7 @@ func TestAsynchronousTemporalQueue(t *testing.T) {
 }
 
 func TestAsynchronousTemporalQueueWithSampling(t *testing.T) {
-	queue := NewAsynchronousTemporalQueue()
+	queue := core.NewAsynchronousTemporalQueue()
 
 	// Test CreateChannel
 	queue.CreateChannel("channel1")
@@ -110,7 +112,7 @@ func BenchmarkCreateChannel(b *testing.B) {
 			defer wg.Done()
 			for j := 0; j < b.N; j++ {
 				key := "channel_" + time.Now().String()
-				queue := NewAsynchronousTemporalQueue()
+				queue := core.NewAsynchronousTemporalQueue()
 				queue.CreateChannel(key)
 			}
 		}()
@@ -121,7 +123,7 @@ func BenchmarkCreateChannel(b *testing.B) {
 // BenchmarkCloseChannel 测试关闭通道的性能
 func BenchmarkCloseChannel(b *testing.B) {
 	// 创建异步时间队列实例
-	queue := NewAsynchronousTemporalQueue()
+	queue := core.NewAsynchronousTemporalQueue()
 
 	// 并发数量，可根据需要调整
 	concurrency := 100
@@ -152,7 +154,7 @@ func BenchmarkCloseChannel(b *testing.B) {
 // BenchmarkPush 测试推送任务的性能
 func BenchmarkPush(b *testing.B) {
 	// 创建异步时间队列实例
-	queue := NewAsynchronousTemporalQueue()
+	queue := core.NewAsynchronousTemporalQueue()
 
 	// 并发数量，可根据需要调整
 	concurrency := 100
@@ -177,7 +179,7 @@ func BenchmarkPush(b *testing.B) {
 // BenchmarkPop 测试弹出任务的性能
 func BenchmarkPop(b *testing.B) {
 	// 创建异步时间队列实例
-	queue := NewAsynchronousTemporalQueue()
+	queue := core.NewAsynchronousTemporalQueue()
 
 	// 并发数量，可根据需要调整
 	concurrency := 100
@@ -201,7 +203,7 @@ func BenchmarkPop(b *testing.B) {
 // BenchmarkHead 测试获取队首任务的性能
 func BenchmarkHead(b *testing.B) {
 	// 创建异步时间队列实例
-	queue := NewAsynchronousTemporalQueue()
+	queue := core.NewAsynchronousTemporalQueue()
 
 	// 并发数量，可根据需要调整
 	concurrency := 100
