@@ -8,7 +8,7 @@ import (
 
 type AsynchronousTemporalQueue struct {
 	channelMap     sync.Map
-	durationWindow int64
+	durationWindow time.Duration
 	curNTP         int64
 	sampleMode     bool
 	sampleWeights  sync.Map
@@ -40,9 +40,14 @@ func (q *AsynchronousTemporalQueue) taskSample() {
 		for { // 开始一个无限循环，用于处理队列中的数据。
 			// 从队列中弹出一个元素，包括其值、NTP时间戳和成功标志。
 			values, ntp, ok := q.pop()
-
+			if q.curNTP == 0 {
+				q.curNTP = ntp
+			}
 			if ok { // 如果弹出成功（ok 为真）。
-				if ntp-q.curNTP < q.durationWindow { // 如果当前 NTP 时间戳与 curNTP 的差值小于 durationWindow。
+				// fmt.Println(ntp, q.curNTP, q.durationWindow)
+				difflib := time.Duration(ntp - q.curNTP)
+				// fmt.Println(difflib, q.durationWindow)
+				if difflib < q.durationWindow { // 如果当前 NTP 时间戳与 curNTP 的差值小于 durationWindow。
 					sumWeight := 0.0                 // 初始化权重和。
 					for key, value := range values { // 遍历 values 中的每个键值对。
 						if weight, ok := q.sampleWeights.Load(key); ok { // 如果键对应的权重存在。
@@ -60,12 +65,13 @@ func (q *AsynchronousTemporalQueue) taskSample() {
 				} else { // 如果 NTP 时间戳与 curNTP 的差值不小于 durationWindow。
 					q.curNTP = ntp // 更新 curNTP 为当前的 NTP 时间戳。
 					// 将 item_buffer 中最大权重对应的元素复制到近似结果映射中。
-					for key, value := range q.item_buffer[max_index] {
-						approxy_res[key] = value
-					}
 
 					// 如果 item_buffer 不为空，将近似结果和当前的 NTP 时间戳推送到输出队列。
 					if len(q.item_buffer) != 0 {
+
+						for key, value := range q.item_buffer[max_index] {
+							approxy_res[key] = value
+						}
 						q.out.queue.Push(approxy_res, q.curNTP)
 					}
 					break // 退出循环，因为我们已经处理了所有需要的数据。
@@ -86,14 +92,15 @@ func (q *AsynchronousTemporalQueue) StartSample(sampleRate int, sampleWeights sy
 		}
 		return true
 	})
-	intervalInSeconds := 1.0 / float64(sampleRate)
-	q.durationWindow = int64(intervalInSeconds * 1000000000)
+	intervalInMilliSeconds := 1000.0 / float64(sampleRate)
+	q.durationWindow = time.Duration(intervalInMilliSeconds) * time.Millisecond
+	// fmt.Println("sampleRate:", sampleRate, "intervalInSeconds:", intervalInMilliSeconds, "durationWindow:", q.durationWindow)
 	if q.sampleMode {
 		return
 	}
 	q.item_buffer = make([]map[string]any, 0)
 	q.out = NewAsynchronousTemporalQueueItem()
-	q.curNTP = time.Now().UnixNano()
+	q.curNTP = 0
 	q.sampleMode = true
 	go q.taskSample()
 }
@@ -231,9 +238,10 @@ func (q *AsynchronousTemporalQueue) Pop() (values map[string]any, NTP int64, ok 
 	if q.sampleMode {
 		v, ntp, ok := q.out.queue.Pop()
 		if ok {
+			// println(ntp)
 			return v.(map[string]any), ntp, true
 		} else {
-			return q.pop()
+			return nil, 0, false
 		}
 	}
 	return q.pop()
