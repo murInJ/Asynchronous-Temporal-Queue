@@ -21,8 +21,11 @@ jobs:
       with:
         go-version: '1.22'
 
-    - name: Build
-      run: go build -v ./... -exclude=test.go
+    - name: Build_core
+      run: go build -v ./core/...
+
+    - name: Build_test
+      run: go build -v ./test/ATQ_test.go
 
     - name: Test
       run: go test -v ./...
